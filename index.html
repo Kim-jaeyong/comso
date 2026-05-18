@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>컴소 야시장</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
+  .app { max-width: 430px; margin: 0 auto; background: white; min-height: 100vh; }
+
+  .topbar { padding: 20px 16px 14px; background: white; border-bottom: 1px solid #eee; }
+  .badge-amber { display: inline-block; background: #FAEEDA; color: #854F0B; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; margin-bottom: 6px; }
+  .topbar-title { font-size: 22px; font-weight: 700; color: #111; }
+  .topbar-sub { font-size: 13px; color: #888; margin-top: 3px; }
+
+  .nav { display: grid; grid-template-columns: 1fr 1fr; background: white; border-bottom: 1px solid #eee; }
+  .nav-btn { padding: 14px 8px; border: none; background: white; color: #999; font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; }
+  .nav-btn.active { color: #185FA5; border-bottom: 3px solid #185FA5; }
+
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  .section-gap { margin-bottom: 22px; }
+  .label { font-size: 12px; color: #888; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  .menu-card { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: white; border: 1.5px solid #eee; border-radius: 12px; margin-bottom: 8px; }
+  .menu-card.sel { border-color: #185FA5; background: #EEF5FF; }
+  .mname { font-size: 15px; color: #111; font-weight: 600; }
+  .mprice { font-size: 13px; color: #888; margin-top: 3px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 10px; }
+  .qbtn { width: 34px; height: 34px; border: 1.5px solid #ddd; border-radius: 8px; background: white; color: #111; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .qbtn:active { background: #f0f0f0; }
+  .qnum { font-size: 16px; font-weight: 700; min-width: 20px; text-align: center; color: #111; }
+
+  input[type=text], input[type=password], textarea {
+    width: 100%; padding: 13px 14px; border: 1.5px solid #ddd; border-radius: 10px;
+    font-size: 15px; color: #111; background: white; outline: none; font-family: inherit;
+  }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus { border-color: #185FA5; }
+  textarea { resize: none; height: 80px; line-height: 1.5; }
+
+  .tgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+  .tcell { padding: 11px 2px; border: 1.5px solid #eee; border-radius: 8px; background: white; color: #888; font-size: 14px; text-align: center; cursor: pointer; font-weight: 500; }
+  .tcell.sel { border-color: #185FA5; background: #EEF5FF; color: #185FA5; font-weight: 700; }
+  .tcell:active { background: #f0f0f0; }
+
+  .cart-box { background: #f8f8f8; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .cart-row { display: flex; justify-content: space-between; font-size: 14px; color: #333; padding: 4px 0; }
+  .cart-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #111; border-top: 1px solid #e0e0e0; margin-top: 8px; padding-top: 10px; }
+
+  .big-btn { width: 100%; padding: 16px; background: #185FA5; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+  .big-btn:active { background: #0d4a87; }
+  .pay-btn { width: 100%; padding: 15px; background: #3A1D96; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; text-decoration: none; display: block; text-align: center; }
+  .pay-btn:active { background: #2d1678; }
+  .hint { font-size: 12px; color: #bbb; text-align: center; margin-top: 10px; padding-bottom: 30px; }
+
+  .stats2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .stat-c { background: #f8f8f8; border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-v { font-size: 24px; font-weight: 700; color: #111; }
+  .stat-l { font-size: 11px; color: #888; margin-top: 3px; font-weight: 500; }
+
+  .seg { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1.5px solid #eee; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  .seg-btn { padding: 11px 4px; border: none; background: white; color: #999; font-size: 13px; cursor: pointer; font-weight: 500; }
+  .seg-btn.active { background: #f0f0f0; color: #111; font-weight: 700; }
+
+  .ocard { background: white; border: 1.5px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .ocard.done { opacity: 0.4; }
+  .ocard.cancelled { opacity: 0.35; border-color: #f09595; }
+  .ohead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .onum { font-size: 14px; font-weight: 700; color: #111; }
+  .otime { font-size: 12px; color: #bbb; }
+  .ometa { font-size: 13px; color: #888; margin-bottom: 6px; }
+  .tname-badge { display: inline-block; background: #EEF5FF; color: #185FA5; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 4px; font-weight: 600; }
+  .oitems { font-size: 14px; color: #333; margin-bottom: 8px; line-height: 1.7; }
+  .omemo { font-size: 13px; color: #854F0B; background: #FAEEDA; border-radius: 8px; padding: 7px 10px; margin-bottom: 10px; }
+  .ofoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .oamt { font-size: 16px; font-weight: 700; color: #185FA5; }
+  .btn-row { display: flex; gap: 6px; }
+  .done-btn { padding: 8px 14px; border: 1.5px solid #ddd; border-radius: 8px; background: white; font-size: 13px; color: #555; cursor: pointer; font-weight: 600; }
+  .cancel-btn { padding: 8px 14px; border: 1.5px solid #f09595; border-radius: 8px; background: white; font-size: 13px; color: #e24b4a; cursor: pointer; font-weight: 600; }
+  .done-btn:active { background: #f0f0f0; }
+  .cancel-btn:active { background: #fcebeb; }
+  .badge-green { display: inline-block; background: #EAF3DE; color: #3B6D11; font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+  .badge-red { display: inline-block; background: #FCEBEB; color: #A32D2D; font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+
+  .live-label { font-size: 12px; color: #3B6D11; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .live-dot { width: 7px; height: 7px; background: #3B6D11; border-radius: 50%; animation: blink 1.5s infinite; flex-shrink: 0; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .lock-wrap { padding: 60px 24px; text-align: center; }
+  .lock-title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .lock-sub { font-size: 14px; color: #888; margin-bottom: 24px; }
+  .pw-input { width: 100%; max-width: 220px; text-align: center; font-size: 22px; letter-spacing: 10px; padding: 13px; border: 1.5px solid #ddd; border-radius: 10px; margin-bottom: 14px; }
+  .pw-btn { width: 100%; max-width: 220px; padding: 14px; background: #185FA5; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .pw-err { font-size: 13px; color: #e24b4a; margin-top: 10px; }
+
+  .empty { text-align: center; color: #ccc; font-size: 14px; padding: 40px 0; }
+  .danger-btn { width: 100%; padding: 14px; border: 1.5px solid #eee; border-radius: 12px; background: white; color: #e24b4a; font-size: 14px; cursor: pointer; font-weight: 600; margin-top: 12px; margin-bottom: 30px; }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #111; color: white; padding: 13px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="badge-amber">🏮 과기대 축제</div>
+    <div class="topbar-title">컴소 야시장</div>
+    <div class="topbar-sub">메뉴 선택 후 카카오페이로 결제해 주세요</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('order',this)">
+      <i class="ti ti-shopping-cart"></i> 주문하기
+    </button>
+    <button class="nav-btn" onclick="showTab('admin',this)">
+      <i class="ti ti-settings"></i> 관리자
+    </button>
+  </div>
+
+  <div id="tab-order" class="page active">
+    <div class="section-gap">
+      <div class="label">메뉴 선택</div>
+      <div id="menu-list"></div>
+    </div>
+    <div class="section-gap">
+      <div class="label">주문자 이름</div>
+      <input type="text" id="cname" placeholder="이름을 입력하세요" />
+    </div>
+    <div class="section-gap">
+      <div class="label">테이블 번호</div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
+    <div class="section-gap">
+      <div class="label">요청사항 (선택)</div>
+      <textarea id="cmemo" placeholder="예: 덜 맵게, 젓가락 빼주세요 등"></textarea>
+    </div>
+    <div id="cart-box" class="cart-box" style="display:none">
+      <div class="label" style="margin-bottom:10px">주문 내역</div>
+      <div id="cart-rows"></div>
+      <div class="cart-total"><span>합계</span><span id="cart-amt"></span></div>
+    </div>
+    <button class="big-btn" onclick="placeOrder()">주문 접수하기</button>
+    <a class="pay-btn" href="https://qr.kakaopay.com/FZ8yQDDGs" target="_blank">카카오페이로 결제하기</a>
+    <p class="hint">주문 금액을 직접 입력 후 송금해 주세요</p>
+  </div>
+
+  <div id="tab-admin" class="page">
+    <div id="admin-lock">
+      <div class="lock-wrap">
+        <div class="lock-title">🔒 관리자</div>
+        <div class="lock-sub">비밀번호를 입력하세요</div>
+        <input type="password" class="pw-input" id="pw" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()" />
+        <br>
+        <button class="pw-btn" onclick="checkPw()">확인</button>
+        <div class="pw-err" id="pw-err"></div>
+      </div>
+    </div>
+
+    <div id="admin-panel" style="display:none">
+      <div class="live-label"><span class="live-dot"></span> 실시간 업데이트 중 (3초마다)</div>
+      <div class="stats2">
+        <div class="stat-c"><div class="stat-v" id="s-wait">0</div><div class="stat-l">대기 중</div></div>
+        <div class="stat-c"><div class="stat-v" id="s-done">0</div><div class="stat-l">완료</div></div>
+        <div class="stat-c"><div class="stat-v" id="s-total">0</div><div class="stat-l">총 주문</div></div>
+        <div class="stat-c"><div class="stat-v" id="s-rev">0</div><div class="stat-l">매출(원)</div></div>
+      </div>
+      <div class="seg">
+        <button class="seg-btn active" id="seg-wait" onclick="switchSeg('wait')">대기 중</button>
+        <button class="seg-btn" id="seg-done" onclick="switchSeg('done')">완료</button>
+        <button class="seg-btn" id="seg-cancel" onclick="switchSeg('cancel')">취소</button>
+      </div>
+      <div id="order-list"></div>
+      <button class="danger-btn" onclick="clearAll()">전체 초기화</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MENUS=[
+  {name:'마라우삼겹숙주볶음',price:7000,emoji:'🌶️'},
+  {name:'훈제오리무쌈말이',price:7500,emoji:'🦆'},
+  {name:'만두국',price:4000,emoji:'🥟'},
+  {name:'닭꼬치',price:4000,emoji:'🍢'},
+  {name:'라면땅',price:1500,emoji:'🍿'},
+  {name:'에이드',price:3000,emoji:'🧃'},
+  {name:'뽑기',price:5000,emoji:'🎰'},
+];
+const ADMIN_PW='6636';
+const SK='comso_v5';
+let qty={};
+let selTable=null;
+let curSeg='wait';
+let lastCount=0;
+let adminActive=false;
+let audioCtx=null;
+MENUS.forEach((_,i)=>qty[i]=0);
+
+function getOrders(){try{return JSON.parse(localStorage.getItem(SK)||'[]');}catch{return[];}}
+function saveOrders(o){try{localStorage.setItem(SK,JSON.stringify(o));}catch{}}
+
+function showTab(tab,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  adminActive=(tab==='admin');
+  if(adminActive&&document.getElementById('admin-panel').style.display==='block') renderAdmin();
+}
+
+function playAlert(){
+  try{
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    [880,1100,880].forEach((freq,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=freq;o.type='sine';
+      const t=audioCtx.currentTime+i*0.15;
+      g.gain.setValueAtTime(0.3,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o.start(t);o.stop(t+0.13);
+    });
+  }catch(e){}
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function pollOrders(){
+  const orders=getOrders();
+  const waitCount=orders.filter(o=>!o.done&&!o.cancelled).length;
+  if(waitCount>lastCount){
+    playAlert();
+    showToast('🔔 새 주문 '+(waitCount-lastCount)+'건이 들어왔어요!');
+  }
+  lastCount=waitCount;
+  if(adminActive&&document.getElementById('admin-panel').style.display==='block') renderAdmin();
+}
+
+setInterval(pollOrders,3000);
+
+function renderMenus(){
+  document.getElementById('menu-list').innerHTML=MENUS.map((m,i)=>`
+    <div class="menu-card" id="mc-${i}">
+      <div>
+        <div class="mname">${m.emoji} ${m.name}</div>
+        <div class="mprice">${m.price.toLocaleString()}원</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qbtn" onclick="chg(${i},-1)">−</button>
+        <span class="qnum" id="q-${i}">0</span>
+        <button class="qbtn" onclick="chg(${i},1)">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderTgrid(){
+  document.getElementById('tgrid').innerHTML=Array.from({length:20},(_,i)=>`
+    <div class="tcell" id="tc-${i+1}" onclick="selT(${i+1})">${i+1}</div>`).join('');
+}
+
+function selT(n){
+  selTable=n;
+  document.querySelectorAll('.tcell').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('tc-'+n).classList.add('sel');
+}
+
+function chg(i,d){
+  qty[i]=Math.max(0,qty[i]+d);
+  document.getElementById('q-'+i).textContent=qty[i];
+  document.getElementById('mc-'+i).classList.toggle('sel',qty[i]>0);
+  updateCart();
+}
+
+function updateCart(){
+  const items=MENUS.map((m,i)=>({...m,q:qty[i]})).filter(m=>m.q>0);
+  const box=document.getElementById('cart-box');
+  if(!items.length){box.style.display='none';return;}
+  box.style.display='block';
+  document.getElementById('cart-rows').innerHTML=items.map(m=>
+    `<div class="cart-row"><span>${m.emoji} ${m.name} ×${m.q}</span><span>${(m.price*m.q).toLocaleString()}원</span></div>`).join('');
+  document.getElementById('cart-amt').textContent=items.reduce((s,m)=>s+m.price*m.q,0).toLocaleString()+'원';
+}
+
+function placeOrder(){
+  const name=document.getElementById('cname').value.trim();
+  const memo=document.getElementById('cmemo').value.trim();
+  const items=MENUS.map((m,i)=>({...m,q:qty[i]})).filter(m=>m.q>0);
+  if(!name){alert('이름을 입력해 주세요!');return;}
+  if(!selTable){alert('테이블 번호를 선택해 주세요!');return;}
+  if(!items.length){alert('메뉴를 선택해 주세요!');return;}
+  const total=items.reduce((s,m)=>s+m.price*m.q,0);
+  const orders=getOrders();
+  const tbl=selTable;
+  orders.push({
+    id:Date.now(),num:orders.length+1,name,table:tbl,memo,
+    items:items.map(m=>({name:m.name,emoji:m.emoji,price:m.price,q:m.q})),
+    total,
+    time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    done:false,cancelled:false,
+  });
+  saveOrders(orders);
+  MENUS.forEach((_,i)=>{qty[i]=0;});
+  selTable=null;
+  renderMenus();renderTgrid();updateCart();
+  document.getElementById('cname').value='';
+  document.getElementById('cmemo').value='';
+  alert(`주문 완료!\n${tbl}번 테이블 · ${name}님\n합계 ${total.toLocaleString()}원\n카카오페이로 결제해 주세요!`);
+}
+
+function checkPw(){
+  if(document.getElementById('pw').value===ADMIN_PW){
+    document.getElementById('admin-lock').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    adminActive=true;
+    lastCount=getOrders().filter(o=>!o.done&&!o.cancelled).length;
+    renderAdmin();
+  } else {
+    document.getElementById('pw-err').textContent='비밀번호가 틀렸어요';
+  }
+}
+
+function switchSeg(seg){
+  curSeg=seg;
+  ['wait','done','cancel'].forEach(s=>{
+    document.getElementById('seg-'+s).classList.toggle('active',s===seg);
+  });
+  renderOrderList();
+}
+
+function renderAdmin(){
+  const orders=getOrders();
+  const waiting=orders.filter(o=>!o.done&&!o.cancelled);
+  const done=orders.filter(o=>o.done);
+  const cancelled=orders.filter(o=>o.cancelled);
+  document.getElementById('s-wait').textContent=waiting.length;
+  document.getElementById('s-done').textContent=done.length;
+  document.getElementById('s-total').textContent=orders.length;
+  document.getElementById('s-rev').textContent=done.reduce((s,o)=>s+o.total,0).toLocaleString();
+  renderOrderList();
+}
+
+function renderOrderList(){
+  const orders=getOrders();
+  let list;
+  if(curSeg==='wait') list=orders.filter(o=>!o.done&&!o.cancelled);
+  else if(curSeg==='done') list=orders.filter(o=>o.done);
+  else list=orders.filter(o=>o.cancelled);
+
+  const el=document.getElementById('order-list');
+  if(!list.length){
+    const msgs={wait:'대기 중인 주문이 없어요 👍',done:'완료된 주문이 없어요',cancel:'취소된 주문이 없어요'};
+    el.innerHTML=`<div class="empty">${msgs[curSeg]}</div>`;return;
+  }
+  el.innerHTML=list.map(o=>`
+    <div class="ocard ${o.done?'done':''} ${o.cancelled?'cancelled':''}">
+      <div class="ohead">
+        <span class="onum">No.${o.num}</span>
+        <span class="otime">${o.time}</span>
+      </div>
+      <div class="ometa">${o.name}님 <span class="tname-badge">${o.table}번 테이블</span></div>
+      <div class="oitems">${o.items.map(i=>`${i.emoji} ${i.name} ×${i.q}`).join('<br>')}</div>
+      ${o.memo?`<div class="omemo">📝 ${o.memo}</div>`:''}
+      <div class="ofoot">
+        <span class="oamt">${o.total.toLocaleString()}원</span>
+        <div class="btn-row">
+          ${o.cancelled
+            ?'<span class="badge-red">취소됨</span>'
+            :o.done
+              ?'<span class="badge-green">완료</span>'
+              :`<button class="done-btn" onclick="markDone(${o.id})">✓ 나감</button>
+                <button class="cancel-btn" onclick="cancelOrder(${o.id})">✕ 취소</button>`
+          }
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function markDone(id){
+  const orders=getOrders();
+  const o=orders.find(o=>o.id===id);
+  if(o){o.done=true;saveOrders(orders);renderAdmin();}
+}
+
+function cancelOrder(id){
+  if(!confirm('이 주문을 취소할까요?'))return;
+  const orders=getOrders();
+  const o=orders.find(o=>o.id===id);
+  if(o){o.cancelled=true;saveOrders(orders);renderAdmin();showToast('주문이 취소됐어요');}
+}
+
+function clearAll(){
+  if(confirm('전체 주문을 초기화할까요?')){saveOrders([]);lastCount=0;renderAdmin();}
+}
+
+renderMenus();
+renderTgrid();
+</script>
+</body>
+</html>
